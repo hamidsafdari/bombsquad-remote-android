@@ -64,6 +64,7 @@ class MyGLSurfaceView extends GLSurfaceView {
   boolean _prefsHover;
   boolean _quitHover;
   boolean _startHover;
+  private long _lastQuitTouch = 0;
 
   boolean _dPadTouchIsMove;
   boolean _inited = false;
@@ -1316,6 +1317,11 @@ class MyGLSurfaceView extends GLSurfaceView {
           //_quitHover = false;
           _gl.quitButtonPressed = false;
           if (_quitHover) {
+            if (System.currentTimeMillis() - _lastQuitTouch > 500) {
+              _lastQuitTouch = System.currentTimeMillis();
+              _gl.quitButtonPressed = false;
+              return true;
+            }
 
             // ewwww - seeing that in some cases our onDestroy()
             // doesn't get called for a while which keeps the server
@@ -1502,7 +1508,7 @@ class MyGLSurfaceView extends GLSurfaceView {
 public class GamePadActivity extends Activity {
 
   // flip this on for lots of log spewage to help diagnose oddities
-  public final static boolean debug = false;
+  public final static boolean debug = true;
   public final static String TAG = "BSRemoteGamePad";
   private WorkerThread _readThread;
   private WorkerThread _processThread;
@@ -1712,6 +1718,11 @@ public class GamePadActivity extends Activity {
     mLayout.addView(_lagMeter, params);
 
     setContentView(mLayout);
+  }
+
+  @Override
+  public void onBackPressed() {
+    // prevent accidental pulls on edges
   }
 
   public void shutDown() {
